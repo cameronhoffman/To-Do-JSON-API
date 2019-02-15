@@ -9,4 +9,13 @@ class ItemListController():
             name=body['name']
         )
 
+    def update_itemlist(self, listitem_id, body):
+        itemlist=ItemList.select().where(ItemList.id == listitem_id)
+        itemlist.name=body['name']
+        return itemlist
+
+    def delete_itemlist(self, listitem_id):
+        ItemList.delete().where(ItemList.id == listitem_id).execute()
+        return
+
 itemlist_controller = ItemListController()

@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from peewee import *
 from playhouse.shortcuts import model_to_dict, dict_to_model
 
-from controllers import itemlist_controller
+from controllers import itemlist_controller, item_controller
 from models import ItemList, Item
 
 app = Flask(__name__)
@@ -29,42 +29,59 @@ def get_all_itemlists():
 @app.route('/lists', methods=['POST'])
 def create_list():
     """Creates a list based on the request body"""
-    body = request.get_json()
-
-    # Right now, this function tries to create an ItemList immediately, but it
-    # will fail if the body isn't valid.
-    # You need to handle this situation appropriately and exit the function
-    # early, return a 422 error code, and include an appropriate message.
-    itemlist = itemlist_controller.create_itemlist(body)
-
-    return jsonify(model_to_dict(itemlist)), 201
-
-## Not-Implemented
+    try:
+        body = request.get_json()
+    except:
+        return "(List Creation) JSON request parsing failed.", 400 # Catch BadRequest from get_json
+    else:
+        if body['name'] == None: 
+            return "(List Creation) No value to initialize list name.", 422
+        else:
+            itemlist = itemlist_controller.create_itemlist(body)
+            return jsonify(model_to_dict(itemlist)), 201
 
 @app.route('/lists/<listitem_id>')
 def get_itemlist(listitem_id):
-    """Gets a single itemlist by ID"""
-    raise Exception('Implement this route')
+    itemlist = ItemList.get(ItemList.id == 'listitem_id')
+    return jsonify(model_array_to_list(itemlist))
 
 @app.route('/lists/<listitem_id>', methods=['PUT'])
 def update_itemlist(listitem_id):
-    """Updates a single itemlist by ID"""
-    raise Exception('Implement this route')
+    try:
+        body = request.get_json()
+    except:
+        return "(List Update) JSON Request Parsing Failed.", 400 # Catch BadRequest from get_json
+    else:
+        if body['name'] == None:
+            return "(List Update) No value to update list name.", 422
+        else:
+            itemlist = itemlist_controller.update_itemlist(listitem_id, body)
+            return get_itemlist(listitem_id), 200
 
 @app.route('/lists/<listitem_id>', methods=['DELETE'])
 def delete_itemlist(listitem_id):
-    """Deletes a single itemlist by ID"""
-    raise Exception('Implement this route')
+    itemlist_controller.delete_itemlist(listitem_id)
+    return "(List Delete) List deleted.", 404
 
 @app.route('/lists/<listitem_id>/items')
 def get_items_by_list(listitem_id):
-    """Gets all items for a single list"""
-    raise Exception('Implement this route')
+    items = item_controller.get_items_by_list(listitem_id)
+    return jsonify(model_array_to_list(items)), 200
+
+## Not-Implemented
 
 @app.route('/items', methods=['POST'])
 def create_item():
-    """Creates a list based on the request body"""
-    raise Exception('Implement this route')
+    try:
+        body = request.get_json()
+    except:
+        return "(Create Item) JSON Request Parsing Failed.", 400
+    else:
+        if body['name'] == None:
+            return "(Create Item) No value to initialize item name.", 422
+        else:
+            item = item.controller.create_item(body)
+            return jsonify(model_to_dict(item)), 201
 
 @app.route('/items/<item_id>', methods=['PUT'])
 def update_item(item_id):
