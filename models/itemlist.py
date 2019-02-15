@@ -1,6 +1,6 @@
 from peewee import *
 
-from models.base import BaseModel
+from models import BaseModel
 
 class ItemList(BaseModel):
     class Meta:

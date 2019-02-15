@@ -4,8 +4,8 @@ from models import Item, ItemList
 
 def seed():
     # Delete the table data.
-    Item.delete().execute()
     ItemList.delete().execute()
+    Item.delete().execute()
 
     # Create the initial item list
     item_list = ItemList(name='Main List')
